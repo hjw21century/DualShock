@@ -1,0 +1,22 @@
+name: macOS build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test profile processing
+        run: swift test
+      - name: Build universal macOS application
+        run: bash scripts/build-app.sh
+      - name: Upload application
+        uses: actions/upload-artifact@v4
+        with:
+          name: DualShock-macOS-universal
+          path: dist/DualShock-macOS-universal.zip
+          if-no-files-found: error
