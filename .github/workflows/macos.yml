@@ -20,3 +20,11 @@ jobs:
           name: DualShock-macOS-universal
           path: dist/DualShock-macOS-universal.zip
           if-no-files-found: error
+      - name: Upload standalone app icons
+        uses: actions/upload-artifact@v4
+        with:
+          name: DualShock-icons
+          path: |
+            dist/AppIcon.icns
+            dist/AppIcon-1024.png
+          if-no-files-found: error

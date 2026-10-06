@@ -94,7 +94,7 @@ final class HIDMonitor: ObservableObject {
 
     func export() {
         struct Report: Encodable {
-            let appVersion = "0.2.0"
+            let appVersion = "0.2.1"
             let date = Date()
             let system = ProcessInfo.processInfo.operatingSystemVersionString
             let status: String

@@ -1,6 +1,25 @@
 # DualShock
 
+<img src="Resources/Artwork/AppIcon.png" alt="DualShock 应用图标" width="128">
+
 面向 **macOS 14.0+（目标系统 14.7.2）** 的原生游戏手柄管理与配置应用，使用 SwiftUI 和 Apple Game Controller 框架，无第三方运行时依赖。支持 Apple Silicon 与 Intel Mac。
+
+## 实机截图
+
+用户提供的 macOS 实际运行截图：手柄已连接，电量 85%，演示模式关闭。
+
+![DualShock 已连接手柄](docs/images/app-connected.png)
+
+<details>
+<summary>蓝牙连接与实体手柄参考</summary>
+
+![macOS 蓝牙连接](docs/images/bluetooth-connected.png)
+
+![实体手柄](docs/images/controller-reference.png)
+
+</details>
+
+示例图片保存在 [`docs/images`](docs/images)，原始软件图标为 [`Resources/Artwork/AppIcon.png`](Resources/Artwork/AppIcon.png)。构建会生成 macOS `.icns` 与 1024 像素 PNG；可在 Actions 的 `DualShock-icons` artifact 中单独下载。图标制作提示词与生成方式见 [图标说明](Resources/Artwork/README.md)。
 
 ## 当前功能
 

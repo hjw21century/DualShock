@@ -114,7 +114,7 @@ struct ContentView: View {
             }
             Spacer()
             Toggle("演示模式", isOn: $controllers.demo).toggleStyle(.switch).controlSize(.small)
-            Text("macOS 14+  ·  v0.2.0").font(.caption2).foregroundStyle(.tertiary)
+            Text("macOS 14+  ·  v0.2.1").font(.caption2).foregroundStyle(.tertiary)
         }.padding(.horizontal, 20).padding(.bottom, 20).frame(width: 220)
             .background(Color(red: 0.08, green: 0.085, blue: 0.12))
     }
