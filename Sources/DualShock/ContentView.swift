@@ -5,7 +5,7 @@ private let accent = Color(red: 0.57, green: 0.52, blue: 1)
 private let panelColor = Color(red: 0.10, green: 0.11, blue: 0.15)
 
 enum Page: String, CaseIterable, Identifiable {
-    case overview = "设备概览", inputs = "输入测试", mapping = "按键映射", sticks = "摇杆设置", profiles = "配置管理"
+    case overview = "设备概览", inputs = "输入测试", mapping = "按键映射", sticks = "摇杆设置", profiles = "配置管理", diagnostics = "兼容性诊断"
     var id: String { rawValue }
     var icon: String {
         switch self {
@@ -14,6 +14,7 @@ enum Page: String, CaseIterable, Identifiable {
         case .mapping: return "arrow.triangle.branch"
         case .sticks: return "slider.horizontal.3"
         case .profiles: return "square.stack.3d.up"
+        case .diagnostics: return "stethoscope"
         }
     }
 }
@@ -23,6 +24,7 @@ struct ContentView: View {
     @EnvironmentObject private var profiles: ProfileStore
     @State private var page: Page = .overview
     @State private var confirmingDelete = false
+    @AppStorage("controllerAppearance") private var appearance = "abxy"
 
     var body: some View {
         HStack(spacing: 0) {
@@ -33,7 +35,7 @@ struct ContentView: View {
                 Divider().opacity(0.5)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
-                        if controllers.demo {
+                        if controllers.demo && page != .diagnostics {
                             Label("演示模式 · 当前数据为模拟输入，不会控制真实设备", systemImage: "play.rectangle")
                                 .font(.callout).foregroundStyle(.orange).padding(14).frame(maxWidth: .infinity, alignment: .leading)
                                 .background(.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
@@ -44,6 +46,7 @@ struct ContentView: View {
                         case .mapping: mapping
                         case .sticks: sticks
                         case .profiles: profileManagement
+                        case .diagnostics: HIDDiagnosticsView()
                         }
                     }.padding(28)
                 }
@@ -111,7 +114,7 @@ struct ContentView: View {
             }
             Spacer()
             Toggle("演示模式", isOn: $controllers.demo).toggleStyle(.switch).controlSize(.small)
-            Text("macOS 14+  ·  v0.1.0").font(.caption2).foregroundStyle(.tertiary)
+            Text("macOS 14+  ·  v0.2.0").font(.caption2).foregroundStyle(.tertiary)
         }.padding(.horizontal, 20).padding(.bottom, 20).frame(width: 220)
             .background(Color(red: 0.08, green: 0.085, blue: 0.12))
     }
@@ -160,6 +163,10 @@ struct ContentView: View {
                     Spacer()
                     Text(controllers.demo ? "DEMO" : "GAME CONTROLLER").font(.caption2.bold()).tracking(2).foregroundStyle(accent)
                 }
+                Picker("外观标识", selection: $appearance) {
+                    Text("A/B/X/Y · SELECT/START").tag("abxy")
+                    Text("PlayStation 符号").tag("playstation")
+                }.pickerStyle(.segmented)
                 ControllerDiagram(input: controllers.input).frame(height: 260)
                 HStack {
                     Label("实时输入可视化", systemImage: "waveform.path").font(.caption).foregroundStyle(.secondary)
@@ -171,6 +178,7 @@ struct ContentView: View {
             if let selected = controllers.selected, selected.controller.extendedGamepad == nil {
                 Label("此设备不提供扩展手柄输入，暂无法显示完整测试数据。", systemImage: "info.circle").foregroundStyle(.orange)
             }
+            Button("蓝牙已连接但没有输入？打开兼容性诊断") { page = .diagnostics }
             card {
                 Label("灯光颜色", systemImage: "lightbulb.led.fill").font(.headline)
                 HStack(spacing: 12) {
@@ -204,6 +212,7 @@ struct ContentView: View {
             HStack {
                 Button("打开蓝牙设置") { controllers.openBluetooth() }.buttonStyle(.borderedProminent)
                 Button(controllers.scanning ? "正在搜索…" : "搜索手柄") { controllers.discover() }.disabled(controllers.scanning)
+                Button("HID 诊断") { page = .diagnostics }
                 if controllers.scanning { ProgressView().controlSize(.small) }
             }
         }
@@ -382,6 +391,8 @@ struct StickPlot: View {
 
 struct ControllerDiagram: View {
     let input: InputState
+    @AppStorage("controllerAppearance") private var appearance = "abxy"
+    private var isABXY: Bool { appearance == "abxy" }
     var body: some View {
         GeometryReader { geometry in
             let scale = min(geometry.size.width / 520, geometry.size.height / 260)
@@ -389,16 +400,26 @@ struct ControllerDiagram: View {
                 ControllerShell().fill(LinearGradient(colors: [Color(white: 0.27), Color(white: 0.14)], startPoint: .top, endPoint: .bottom))
                     .overlay(ControllerShell().stroke(Color(white: 0.38), lineWidth: 2))
                     .shadow(color: .black.opacity(0.4), radius: 15, y: 12)
-                RoundedRectangle(cornerRadius: 9).fill(Color(white: 0.12)).frame(width: 140, height: 75).position(x: 260, y: 72)
-                RoundedRectangle(cornerRadius: 3).fill(accent).frame(width: 110, height: 3).shadow(color: accent, radius: 6).position(x: 260, y: 32)
+                if isABXY {
+                    Text("HOME").font(.system(size: 10, weight: .bold, design: .rounded))
+                        .frame(width: 42, height: 42)
+                        .background((input.buttons[.home] ?? 0) > 0.1 ? Color.white : Color(red: 0.85, green: 0.04, blue: 0.2), in: Circle())
+                        .foregroundStyle((input.buttons[.home] ?? 0) > 0.1 ? .black : .white)
+                        .position(x: 260, y: 64)
+                } else {
+                    RoundedRectangle(cornerRadius: 9).fill(Color(white: 0.12)).frame(width: 140, height: 60).position(x: 260, y: 62)
+                    RoundedRectangle(cornerRadius: 3).fill(accent).frame(width: 110, height: 3).shadow(color: accent, radius: 6).position(x: 260, y: 32)
+                }
                 key(.up, symbol: "↑", x: 121, y: 67)
                 key(.down, symbol: "↓", x: 121, y: 123)
                 key(.left, symbol: "←", x: 93, y: 95)
                 key(.right, symbol: "→", x: 149, y: 95)
-                key(.y, symbol: "△", x: 399, y: 64)
-                key(.a, symbol: "×", x: 399, y: 126)
-                key(.x, symbol: "□", x: 368, y: 95)
-                key(.b, symbol: "○", x: 430, y: 95)
+                key(.y, symbol: isABXY ? "Y" : "△", x: 399, y: 64)
+                key(.a, symbol: isABXY ? "A" : "×", x: 399, y: 126)
+                key(.x, symbol: isABXY ? "X" : "□", x: 368, y: 95)
+                key(.b, symbol: isABXY ? "B" : "○", x: 430, y: 95)
+                smallKey(.options, title: isABXY ? "SELECT" : "SHARE", x: 226, y: 113)
+                smallKey(.menu, title: isABXY ? "START" : "OPTIONS", x: 294, y: 113)
                 analog(x: input.lx, y: input.ly).position(x: 192, y: 162)
                 analog(x: input.rx, y: input.ry).position(x: 328, y: 162)
                 Image(systemName: "gamecontroller.fill").foregroundStyle(accent.opacity(0.8)).position(x: 260, y: 152)
@@ -416,10 +437,19 @@ struct ControllerDiagram: View {
             .overlay(Circle().stroke(.white.opacity(0.15), lineWidth: 1)).position(x: x, y: y)
     }
 
+    private func smallKey(_ button: PadButton, title: String, x: Double, y: Double) -> some View {
+        VStack(spacing: 3) {
+            RoundedRectangle(cornerRadius: 3)
+                .fill((input.buttons[button] ?? 0) > 0.1 ? accent : Color(white: 0.35))
+                .frame(width: 26, height: 10)
+            Text(title).font(.system(size: 7, weight: .medium))
+        }.position(x: x, y: y)
+    }
+
     private func analog(x: Double, y: Double) -> some View {
         ZStack {
             Circle().fill(Color(white: 0.08)).frame(width: 62, height: 62)
-            Circle().fill(LinearGradient(colors: [Color(white: 0.24), Color(white: 0.12)], startPoint: .top, endPoint: .bottom))
+            Circle().fill(LinearGradient(colors: isABXY ? [Color(red: 0.98, green: 0.06, blue: 0.23), Color(red: 0.62, green: 0.02, blue: 0.11)] : [Color(white: 0.24), Color(white: 0.12)], startPoint: .top, endPoint: .bottom))
                 .frame(width: 45, height: 45).overlay(Circle().stroke(.white.opacity(0.2), lineWidth: 2))
                 .offset(x: x * 9, y: -y * 9)
         }

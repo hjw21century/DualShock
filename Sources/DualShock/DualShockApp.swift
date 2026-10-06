@@ -4,11 +4,13 @@ import SwiftUI
 struct DualShockApp: App {
     @StateObject private var controllers = ControllerManager()
     @StateObject private var profiles = ProfileStore()
+    @StateObject private var hidMonitor = HIDMonitor()
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(controllers)
                 .environmentObject(profiles)
+                .environmentObject(hidMonitor)
                 .preferredColorScheme(.dark)
                 .frame(minWidth: 1000, minHeight: 720)
         }

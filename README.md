@@ -11,6 +11,8 @@
 - 支持设备的 LED 颜色设置；不支持的设备禁用应用按钮。
 - 配置本地持久化、复制、删除及 JSON 导入/导出。导入校验参数范围，写入采用原子操作。
 - 明确标记的演示模式，无手柄也能检查界面和配置处理。
+- A/B/X/Y + SELECT/START/HOME 外观标识，或 PlayStation 符号；仅改变示意图，不假定硬件型号。
+- “兼容性诊断”页通过 IOKit 枚举 HID 游戏手柄，显示 VID/PID、传输方式、输入元素和原始数值，支持 JSON 诊断导出。
 
 **作用范围：** 按键映射和摇杆参数只影响本应用的输出预览，不会向其他游戏注入输入，也不会更改手柄固件。LED 应用按钮会控制选中设备的灯光。当前不提供虚拟手柄驱动、全局键鼠映射、固件升级、自适应扳机或震动控制；若需要这些功能，需要独立实现并进行真机验证。
 
@@ -56,6 +58,19 @@ scripts/build-app.sh          通用 .app 打包脚本
 
 开发环境为 Linux，无法在本机运行 Apple 框架或进行 macOS 真机测试。macOS 编译结果以仓库 Actions 为准。发布前请在 macOS 14.7.2 验证：USB/蓝牙接入、断开重连、多手柄切换、休眠唤醒、电池信息、灯光控制，以及配置保存后重启恢复。
 
-初始提供的两张参考图 URL 返回 HTTP 401，当前界面是独立设计，尚未根据参考图逐项还原。
+## 图中手柄与兼容性诊断
+
+用户补充的图片显示系统蓝牙名称为 `DUALSHOCK 4 Wireless Controller`，实体面板为 A/B/X/Y、SELECT/START/HOME 和红色双摇杆。应用默认示意图使用该面板布局，仍可切换 PlayStation 符号。蓝牙名称不能证明设备型号或协议；灯光、HOME 按键等能力取决于系统实际公开的接口。
+
+若蓝牙显示连接成功，但设备概览没有手柄或按键没有响应：
+
+1. 打开“兼容性诊断”，选择检测到的 HID 接口。
+2. 依次按 A/B/X/Y、SELECT/START，移动左右摇杆和方向键，观察原始值及更新计数。
+3. 若系统提示权限问题，在“隐私与安全性 → 输入监控”中允许 DualShock，然后退出并重开应用。
+4. 导出 JSON 诊断报告，供后续确认 Button 编号和轴对应关系。报告不包含设备序列号。
+
+诊断仅匹配 Generic Desktop 的 Joystick/Game Pad，不匹配键盘和鼠标，不独占设备，不发送输出报告。未收到值显示“未收到”，不会伪造零值。轴归一化按 HID 描述符逻辑范围计算，并不代表已校准的游戏摇杆。未知 HID 协议目前只提供诊断，不自动接入主界面映射；仍需该设备的实际输入报告才能可靠适配。
 
 框架参考：[Apple GCController](https://developer.apple.com/documentation/gamecontroller/gccontroller)、[设备灯光](https://developer.apple.com/documentation/gamecontroller/gcdevicelight)。
+
+HID 参考：[Apple IOHIDManager 输入回调](https://developer.apple.com/documentation/iokit/1438367-iohidmanagerregisterinputvalueca)。

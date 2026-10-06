@@ -106,7 +106,7 @@ final class ControllerManager: ObservableObject {
             (.leftTrigger, pad.leftTrigger), (.rightTrigger, pad.rightTrigger),
             (.up, pad.dpad.up), (.down, pad.dpad.down), (.left, pad.dpad.left), (.right, pad.dpad.right),
             (.leftStick, pad.leftThumbstickButton), (.rightStick, pad.rightThumbstickButton),
-            (.menu, pad.buttonMenu), (.options, pad.buttonOptions)
+            (.menu, pad.buttonMenu), (.options, pad.buttonOptions), (.home, pad.buttonHome)
         ]
         var state = InputState()
         for (key, button) in elements { state.buttons[key] = Double(button?.value ?? 0) }

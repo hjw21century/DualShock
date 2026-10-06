@@ -2,7 +2,7 @@ import Foundation
 
 public enum PadButton: String, Codable, CaseIterable, Identifiable {
     case a, b, x, y, leftShoulder, rightShoulder, leftTrigger, rightTrigger
-    case up, down, left, right, leftStick, rightStick, menu, options
+    case up, down, left, right, leftStick, rightStick, menu, options, home
     public var id: String { rawValue }
     public var label: String {
         switch self {
@@ -20,8 +20,9 @@ public enum PadButton: String, Codable, CaseIterable, Identifiable {
         case .right: return "→"
         case .leftStick: return "LS / L3"
         case .rightStick: return "RS / R3"
-        case .menu: return "Menu"
-        case .options: return "Options"
+        case .menu: return "START / Menu"
+        case .options: return "SELECT / Options"
+        case .home: return "HOME"
         }
     }
 }
