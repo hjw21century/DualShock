@@ -10,15 +10,6 @@
 
 ![DualShock 已连接手柄](docs/images/app-connected.png)
 
-<details>
-<summary>蓝牙连接与实体手柄参考</summary>
-
-![macOS 蓝牙连接](docs/images/bluetooth-connected.png)
-
-![实体手柄](docs/images/controller-reference.png)
-
-</details>
-
 示例图片保存在 [`docs/images`](docs/images)，原始软件图标为 [`Resources/Artwork/AppIcon.png`](Resources/Artwork/AppIcon.png)。构建会生成 macOS `.icns` 与 1024 像素 PNG；可在 Actions 的 `DualShock-icons` artifact 中单独下载。图标制作提示词与生成方式见 [图标说明](Resources/Artwork/README.md)。
 
 ## 当前功能
