@@ -374,7 +374,7 @@ struct StickPlot: View {
                 Rectangle().fill(.white.opacity(0.1)).frame(width: 1)
                 Circle().fill(accent).frame(width: 12, height: 12)
                     .shadow(color: accent.opacity(0.5), radius: 6)
-                    .offset(x: x * (size / 2 - 6), y: -y * (size / 2 - 6))
+                    .offset(x: CGFloat(x) * (size / 2 - 6), y: -CGFloat(y) * (size / 2 - 6))
             }.frame(width: size, height: size).frame(maxWidth: .infinity, maxHeight: .infinity)
         }.accessibilityLabel(String(format: "摇杆 X %.2f, Y %.2f", x, y))
     }

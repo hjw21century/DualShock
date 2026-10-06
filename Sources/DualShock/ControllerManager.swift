@@ -36,12 +36,14 @@ final class ControllerManager: ObservableObject {
     init() {
         for name in [Notification.Name.GCControllerDidConnect, .GCControllerDidDisconnect] {
             observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                Task { @MainActor in self?.refresh() }
+                guard let self else { return }
+                Task { @MainActor in self.refresh() }
             })
         }
         refresh()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.sample() }
+            guard let self else { return }
+            Task { @MainActor in self.sample() }
         }
     }
 
@@ -54,7 +56,8 @@ final class ControllerManager: ObservableObject {
         guard !scanning else { return }
         scanning = true
         GCController.startWirelessControllerDiscovery { [weak self] in
-            Task { @MainActor in self?.stopDiscovery() }
+            guard let self else { return }
+            Task { @MainActor in self.stopDiscovery() }
         }
         Task { [weak self] in
             try? await Task.sleep(nanoseconds: 15_000_000_000)
